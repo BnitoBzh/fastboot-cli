@@ -9,7 +9,7 @@ var RSVP = require('rsvp');
 var parseArgs = require('minimist');
 
 var argOptions = {
-  default: { port: 3000, host: '::' }
+  default: { port: 3000, host: '::', g: false, s: false, c: false }
 };
 
 var options = parseArgs(process.argv.slice(2), argOptions);
@@ -33,10 +33,28 @@ var notifier = {
   }
 };
 
-var server = new FastBootAppServer({
+var fastBootAppServerOptions = {
   distPath: distPath,
-  notifier: notifier
-});
+  notifier: notifier,
+  host: options.host,
+  port: options.port,
+  gzip: options.g,
+  chunkedResponse: options.c
+};
+
+if(options.s) {
+  fastBootAppServerOptions.beforeMiddleware = function (app) {
+    app.use((request, response, next) => {
+      if (request.headers['x-forwarded-proto'] === 'https') {
+        return next();
+      } else {
+        return response.redirect(301, `https://${request.hostname}${request.url}`);
+      }
+    });
+  }
+}
+
+var server = new FastBootAppServer(fastBootAppServerOptions);
 
 console.log('Booting Ember app...');
 
