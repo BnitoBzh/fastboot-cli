@@ -9,7 +9,7 @@ var RSVP = require('rsvp');
 var parseArgs = require('minimist');
 
 var argOptions = {
-  default: { port: 3000, host: '::', g: false, s: false, c: false }
+  default: { port: 3000, host: '::', g: true, s: true, c: true }
 };
 
 var options = parseArgs(process.argv.slice(2), argOptions);
@@ -41,6 +41,8 @@ var fastBootAppServerOptions = {
   gzip: options.g,
   chunkedResponse: options.c
 };
+
+console.log('FastBoot App Server Options :', fastBootAppServerOptions);
 
 if(options.s) {
   fastBootAppServerOptions.beforeMiddleware = function (app) {
