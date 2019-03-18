@@ -46,6 +46,7 @@ console.log('FastBoot App Server Options :', fastBootAppServerOptions);
 
 if(options.s) {
   fastBootAppServerOptions.beforeMiddleware = function (app) {
+    app.disable('x-powered-by');
     app.use((request, response, next) => {
       if (request.headers['x-forwarded-proto'] === 'https') {
         return next();
@@ -55,6 +56,15 @@ if(options.s) {
     });
   }
 }
+
+fastBootAppServerOptions.afterMiddleware = function (app) {
+    app.use((request, response, next) => {
+      if (request.path.indexOf('/assets/') !== -1) {
+        response.set('Cache-Control', 'max-age=365000000, immutable');
+      }
+      response.removeHeader("X-Powered-By");
+    });
+  }
 
 var server = new FastBootAppServer(fastBootAppServerOptions);
 
